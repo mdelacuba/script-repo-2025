@@ -667,6 +667,24 @@ list.venn.csp <- list('Antarctic sponge' = as.vector(as.matrix(csp.anta)),
                       'Temperate sponge' = as.vector(as.matrix(csp.temp)),
                       'Tropical sponge' = as.vector(as.matrix(csp.trop)))
 
+# Search exclusive orthologs by environment:
+exc.csp.ant <- Reduce(setdiff, list(as.vector(as.matrix(csp.anta)),
+                     as.vector(as.matrix(csp.temp)),
+                     as.vector(as.matrix(csp.trop))))
+
+exc.csp.temp <- Reduce(setdiff, list(as.vector(as.matrix(csp.temp)),
+                     as.vector(as.matrix(csp.anta)),
+                     as.vector(as.matrix(csp.trop))))
+
+exc.csp.trop <- Reduce(setdiff, list(as.vector(as.matrix(csp.trop)),
+                                     as.vector(as.matrix(csp.anta)),
+                                     as.vector(as.matrix(csp.temp))))
+
+write(exc.csp, "Antarctic/list-exc-csp.txt")
+write(exc.csp.temp, "Temperate/list-exc-csp-temp.txt")
+write(exc.csp.trop, "Tropical/list-exc-csp-trop.txt")
+
+
 # Plot Venn diagrams from metagenomes:
 ## For all genes:
 plot.ortho <- ggVennDiagram(list.venn, 
