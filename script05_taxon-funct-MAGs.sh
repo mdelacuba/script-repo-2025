@@ -48,14 +48,6 @@ do
 	paste -d "\t" <(echo -e "$line\tNucleotide repair proteins\t$(grep -v "^#" $line\_func.annotations | grep -v -i "eukaryota" | grep -E -i "DNA repair|RNA repair|repair protein|repair response|repair endonuclease|repair exonuclease|mismatch repair|photorepair protein|base-excision repair|DNA alkylation repair|damage repair|double-strand break repair|repair of stalled replication forks|repairing DNA|DNA damage lesion repair|base excision repair|double-strand break (DSB) repair|repair of damaged DNA|DNA-repair|UvrABC repair|repair of mismatches in DNA|DNA damage recognition|patch repair" | cut -f8 | sort | uniq -c | awk '{sum+=$1} END {print sum}' )") >> table-adapt-count-MAGs.txt
 done < list_bins.txt
 
-while IFS= read -r line; do a=$( grep -w "$line" table-adapt-count-MAGs.txt | awk -F "\t" '{sum+=$3} END {print sum}' ); echo -e "$line\t$a"; done < list-hgts.txt
-
-for function in "Cold shock proteins" "Chaperones" "Osmoprotectant-related proteins" "Antioxidants" "Antifreeze proteins" "Fatty acid desaturases" "Heat shock proteins" "Nucleotide repair proteins"
-do
-	echo -e "\n$function"
-	grep -w "$function" table-adapt-count-MAGs.txt | grep -wf list-hgts-all.txt | cut -f3
-done
-
 # Metabilic functions:
 grep -v "^#" *_func.annotations | grep -v -i "eukaryota" | cut -f7 | grep "I" | sort | uniq > list-lipid-cogs.txt
 grep -v "^#" *_func.annotations | grep -v -i "eukaryota" | cut -f7 | grep "C" | sort | uniq > list-energ-cogs.txt
