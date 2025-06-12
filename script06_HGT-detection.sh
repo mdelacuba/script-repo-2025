@@ -12,7 +12,6 @@
 ## Input file "list-bins.txt" contains a list of the file names corresponding to all MAGs.
 ## Input file "list-bins-hgts.txt" contains a list of the file names corresponding to MAGs that present HT genes.
 ## Input files "list-recipient-hab-onlySWtoSP.txt" and "list-recipient-tax-onlySWtoSP.txt" contain a manually selected list of the recipient MAGs from sponges presenting HT genes from donor MAGs from seawater.
-## Input file "list_hgts_all.txt" contains a list of the file names corresponding to MAGs involved in HGT.
 ## nohup command was used for each new execution, making a backup of each resulting "nohup.out" file to avoid overwriting. Execution: $ nohup ./{script} &
 ## Output file "tab-count-hgts.txt" was used to calculate percentages of HT genes and manually construct the customized table "tab-corr.txt". This new output file was imported in R to make the correlation plots of "Supplementary Figure S5" (see "script07_plots-stats.r").
 ## Output file "df-count-hgts.txt" was manually modified to leave only % HT genes, resulting in the dataframe file "df-count-hgts.txt". This new output file was imported in R to make the boxplots of "Figure 4" (see "script07_plots-stats.r").
@@ -73,12 +72,12 @@ done < list-bins-hgts.txt
 rm tmp*.txt tmp-*CAF.annotations
 mkdir tmp-cafs && mv tmp-*-*.annotations tmp-cafs/
 
-while IFS= read -r line; do a=$( grep -w "$line" table-adapt-count-MAGs.txt | awk -F "\t" '{sum+=$3} END {print sum}' ); echo -e "$line\t$a"; done < list_hgts_all.txt
+while IFS= read -r line; do a=$( grep -w "$line" table-adapt-count-MAGs.txt | awk -F "\t" '{sum+=$3} END {print sum}' ); echo -e "$line\t$a"; done < list-bins-hgts.txt
 
 for function in "Cold shock proteins" "Chaperones" "Osmoprotectant-related proteins" "Antioxidants" "Antifreeze proteins" "Fatty acid desaturases" "Heat shock proteins" "Nucleotide repair proteins"
 do
 	echo -e "\n$function"
-	grep -w "$function" table-adapt-count-MAGs.txt | grep -wf list_hgts_all.txt | cut -f3
+	grep -w "$function" table-adapt-count-MAGs.txt | grep -wf list-bins-hgts.txt | cut -f3
 done
 
 # For lipid transport and metabolism (LTM, COG letter "I"):
