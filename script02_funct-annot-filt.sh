@@ -8,7 +8,7 @@
 ## Input file "tmp-names-all.txt" contains a list of the file names corresponding to all the samples/metagenomes.
 ## nohup command was used for each new execution, making a backup of each resulting "nohup.out" file to avoid overwriting. Execution: $ nohup ./{script} & 
 ## Output file "table-all-func.txt" was used to manually convert sequence numbers in percentages and make the boxplots of "Figure 2" and "Supplementary Figure S3" (see "script07_plots-stats.r").
-## Output files "list-orthologs-*.txt" and "list-csps-*.txt" were imported in R to make the Venn diagrams of "Supplementary Figure S1" and "Supplementary Figure S4", respectively (see "script07_plots-stats.r")
+## Output files "list-orthologs-*.txt" and "list-csps-*.txt" were imported in R to make the Venn diagrams of "Supplementary Figure S1" and "Supplementary Figure S4", respectively, and also to generate the input file "list-exc-csp-anta.txt" (see "script07_plots-stats.r").
 ## Output files "all-subs-coldfuncs.txt" and "annot-subs.txt" were imported in R to make the heatmap of "Supplementary Figure S2" (see "script07_plots-stats.r").
 
 
@@ -103,6 +103,19 @@ grep -v "^#" *.annotations | grep -E -v -i "eukaryota|toxin" | grep -i "cold" | 
 grep -v "^#" *.annotations | grep -E -v -i "eukaryota|toxin" | grep -i "cold" | cut -f2 | sort | uniq > list-csps-temp.txt # Into "Temperate" folder
 grep -v "^#" *.annotations | grep -E -v -i "eukaryota|toxin" | grep -i "cold" | cut -f2 | sort | uniq > list-csps-trop.txt # Into "Tropical" folder
 
+# Extract annotations of exclusive orthologs from Antarctic sponge microbiomes:
+while IFS= read -r line; do grep -v -i -E "eukaryota|^#" *.annotations | grep -w "$line" | cut -f1,2,8,9 | sed "s/:/\t/g" | sed "s/.annotations//g" >> table-exc-csp.txt; done < list-exc-csp-anta.txt # Into "Antarctic" folder
+while IFS= read -r line; do grep -v -i -E "eukaryota|^#" *.annotations | grep -w "$line" | cut -f1,2,8,9 | sed "s/:/\t/g" | sed "s/.annotations//g" >> table-exc-csp.txt; done < list-exc-csp-temp.txt # Into "Temperate" folder
+while IFS= read -r line; do grep -v -i -E "eukaryota|^#" *.annotations | grep -w "$line" | cut -f1,2,8,9 | sed "s/:/\t/g" | sed "s/.annotations//g" >> table-exc-csp.txt; done < list-exc-csp-trop.txt # Into "Tropical" folder
+
+# Count occurrence of exclusive csp orthologs:
+cut -f3 table-exc-csp-anta.txt | sort | uniq -c | sort
+cut -f3 table-exc-csp-temp.txt | sort | uniq -c | sort
+cut -f3 table-exc-csp-trop.txt | sort | uniq -c | sort
+
+# Confirm the number of samples in which orthologs IDs occur in at least 50% of the total sample size (manually conversion to %):
+grep "313603.FB2170_01856" table-exc-csp-anta.txt | cut -f1 | sort | uniq # "313603.FB2170_01856" is an ortholog ID, the same for the rest of orthologs representing potentially at least 50% of sponge microbiomes separately for each per-environment folder
+
 
 #--- Assessing the presence/absence of genes for cold adaptation from subsampling of the quality-filtered reads:
 
@@ -149,5 +162,4 @@ sed -i "s/fatd/Fatty acid desaturase/g" annot-subs.txt
 sed -i "s/hsps/Heat-shock related/g" annot-subs.txt
 sed -i "s/osmo/Osmoprotectant related/g" annot-subs.txt
 sed -i "s/repa/Nucleotide repair/g" annot-subs.txt
-
 
