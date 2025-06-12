@@ -68,10 +68,18 @@ do
 	head -n5 ${line}_hgts.annotations | tail -n1 > tmp-${line}_CAF.annotations && cat tmp-${line}-*.annotations >> tmp-${line}_CAF.annotations
 	cut -f1 tmp-${line}_CAF.annotations | tail -n +2 > tmp-${line}.txt
 	paste -d "\t" <(echo -e "#protein_ID\tsilhouette_score\tpotential_donor" && grep -wf tmp-${line}.txt tabs-hgts-hgtector/sw/${line}_hgtector.txt) tmp-${line}_CAF.annotations >> ${line}_CAF.annotations
-done < list_hgts_all.txtx
+done < list-bins-hgts.txt
 
 rm tmp*.txt tmp-*CAF.annotations
 mkdir tmp-cafs && mv tmp-*-*.annotations tmp-cafs/
+
+while IFS= read -r line; do a=$( grep -w "$line" table-adapt-count-MAGs.txt | awk -F "\t" '{sum+=$3} END {print sum}' ); echo -e "$line\t$a"; done < list_hgts_all.txt
+
+for function in "Cold shock proteins" "Chaperones" "Osmoprotectant-related proteins" "Antioxidants" "Antifreeze proteins" "Fatty acid desaturases" "Heat shock proteins" "Nucleotide repair proteins"
+do
+	echo -e "\n$function"
+	grep -w "$function" table-adapt-count-MAGs.txt | grep -wf list_hgts_all.txt | cut -f3
+done
 
 # For lipid transport and metabolism (LTM, COG letter "I"):
 while IFS= read -r line
@@ -83,7 +91,7 @@ do
 	grep -v "^#" ${line}_hgts.annotations | grep -v -i "eukaryota" | awk -F "\t" '$7 == "IQ"' >> ${line}_lipid.annotations
 	grep -v "^#" ${line}_hgts.annotations | grep -v -i "eukaryota" | awk -F "\t" '$7 == "IT"' >> ${line}_lipid.annotations
 	grep -v "^#" ${line}_hgts.annotations | grep -v -i "eukaryota" | awk -F "\t" '$7 == "IU"' >> ${line}_lipid.annotations
-done < list_hgts_all.txt
+done < list-bins-hgts.txt
 
 # For energy production and conversion (EPC, COG letter "C"):
 while IFS= read -r line
@@ -101,7 +109,7 @@ do
 	grep -v "^#" ${line}_hgts.annotations | grep -v -i "eukaryota" | awk -F "\t" '$7 == "CP"' >> ${line}_energ.annotations
 	grep -v "^#" ${line}_hgts.annotations | grep -v -i "eukaryota" | awk -F "\t" '$7 == "CQ"' >> ${line}_energ.annotations
 	grep -v "^#" ${line}_hgts.annotations | grep -v -i "eukaryota" | awk -F "\t" '$7 == "CT"' >> ${line}_energ.annotations
-done < list_hgts_all.txt
+done < list-bins-hgts.txt
 
 # For amino acid transport and metabolism" (ATM, COG letter "E"):
 while IFS= read -r line
@@ -123,7 +131,7 @@ do
 	grep -v "^#" ${line}_hgts.annotations | grep -v -i "eukaryota" | awk -F "\t" '$7 == "EQ"' >> ${line}_amino.annotations
 	grep -v "^#" ${line}_hgts.annotations | grep -v -i "eukaryota" | awk -F "\t" '$7 == "ET"' >> ${line}_amino.annotations
 	grep -v "^#" ${line}_hgts.annotations | grep -v -i "eukaryota" | awk -F "\t" '$7 == "EU"' >> ${line}_amino.annotations
-done < list_hgts_all.txt
+done < list-bins-hgts.txt
 
 # For carbohydrate transport and metabolism" (CTM, COG letter "G"):
 while IFS= read -r line
@@ -143,19 +151,19 @@ do
 	grep -v "^#" ${line}_hgts.annotations | grep -v -i "eukaryota" | awk -F "\t" '$7 == "GPU"' >> ${line}_carbo.annotations
 	grep -v "^#" ${line}_hgts.annotations | grep -v -i "eukaryota" | awk -F "\t" '$7 == "GT"' >> ${line}_carbo.annotations
 	grep -v "^#" ${line}_hgts.annotations | grep -v -i "eukaryota" | awk -F "\t" '$7 == "GV"' >> ${line}_carbo.annotations
-done < list_hgts_all.txt
+done < list-bins-hgts.txt
 
 # For metal and antibiotic resistance (MAR):
 while IFS= read -r line
 do
 	head -n5 ${line}_hgts.annotations | tail -n1  > ${line}_resis.annotations && grep -Evi "^#|eukaryota" ${line}_hgts.annotations | grep -iE "resistance|antibiotic|drug|antimicrobial|heavy metal|heavy-metal" | grep -Ev "bacteriophage resistance|PhoQ|Antitoxin|nucleosome-like|oxidative stress|low-pH|cold resistance|resistance to hypoosmotic shock|stress resistance|macrophage|phage-resistance|extreme acid resistance|Toll-Interleukin 1-resistance|Serum resistance|TraT complement|Ultraviolet light resistance|Ultra-violet resistance" >> ${line}_resis.annotations
-done < list_hgts_all.txt
+done < list-bins-hgts.txt
 
 # For machinary of integrative and conjugative elements (ICE):
 while IFS= read -r line
 do
 	head -n5 ${line}_hgts.annotations | tail -n1  > ${line}_ices.annotations && grep -Evi "^#|eukaryota|CRISPR|phage" ${line}_hgts.annotations | grep -iE "integrase|relaxase|relaxosome|conjugative|Type IV secretion|Type-IV|Type IV secretory|T4SS|tyrosine recombinase|ice cds17|TrbI-like|TrbI family|TraG family|unidirectional conjugation|Tra gene|TraG-like|TraB family|TraC-like" >> ${line}_ices.annotations
-done < list_hgts_all.txt
+done < list-bins-hgts.txt
 
 
 #--- Counting HT genes:
@@ -179,7 +187,7 @@ echo -e "mag\tclass\tvariable\tpercentage" > df-count-hgts.txt
 while IFS= read -r line
 do
 	 paste -d "\t" <(yes "$line" | head -n22) <(yes $(grep -w "$line" metadata-bins.tsv | cut -f4) | head -n22) <(cut -f29-35,37,62-68,70-76 tab-count-hgts.txt | head -n1 | tr '\t' '\n' | sed "s/%//g") <(grep -w "$line" tab-count-hgts.txt | cut -f29-35,37,62-68,70-76 | tr '\t' '\n')  >> df-count-hgts.txt
-done < list_bins.txt
+done < list-bins.txt
 
 
 #--- Assessing the potential donor taxa (from HGTector2 outputs):
@@ -197,12 +205,13 @@ do
 	do
 		yes "${function}" | head -$(cut -f1 tmp-cafs/tmp-${line}-${function}.annotations | wc -l) >> tmp-fun.txt
 	done
-done < list-hgts-sw.txt #list-ids-hgts.txt
+done < list-bins-hgts.txt
 paste -d "\t" tmp-*.txt > tab-detail-hgts-sw.txt
 rm tmp-*.txt
 
 # Search taxonomy of potential donor taxa in Silva and GTDB databases:
-
+while IFS= read -r line
+do
 	grep -P -m1 "$line" bac120_taxonomy.tsv | cut -f2 | sed s"/;/\t/g" | sed s"/p__//g" | sed s"/c__//g" | sed s"/o__//g" | sed s"/f__//g" | sed s"/g__//g" | sed s"/d__//g" | cut -f1-6 # GTDB database
 	grep -wm1 "$line" tax_slv_ssu_138.2.txt | tr ";" "\t" | cut -f1-6 # Silva database
 done < list-tmp.txt
