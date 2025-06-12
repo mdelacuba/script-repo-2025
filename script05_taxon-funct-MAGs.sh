@@ -35,8 +35,20 @@ done
 #--- Assessing the gene number of selected functional groups: 
 
 # Cold adaptation functions:
+echo -e "ID\tfunction\tcount" > table-adapt-count-MAGs.txt
+while IFS= read -r line
+do
+	paste -d "\t" <(echo -e "$line\tCold shock proteins\t$(grep -v "^#" $line\_func.annotations | grep -v -i "eukaryota" | grep -i "cold" | cut -f2 | sort | uniq -c | awk '{sum+=$1} END {print sum}' )") >> table-adapt-count-MAGs.txt
+	paste -d "\t" <(echo -e "$line\tChaperones\t$(grep -v "^#" $line\_func.annotations| grep -E -v -i "eukaryota|ABC transporter|MsrPQ|MeaI" | grep -i "chaperone" | cut -f8 | sort | uniq -c | awk '{sum+=$1} END {print sum}' )") >> table-adapt-count-MAGs.txt
+	paste -d "\t" <(echo -e "$line\tOsmoprotectant-related proteins\t$(grep -v "^#" $line\_func.annotations | grep -v -i "eukaryota" | grep -i "osmoprotectant" | cut -f9 | sort | uniq -c | awk '{sum+=$1} END {print sum}' )") >> table-adapt-count-MAGs.txt
+	paste -d "\t" <(echo -e "$line\tAntioxidants\t$(grep -v "^#" $line\_func.annotations | grep -v -i "eukaryota" | grep -i "antioxidant" | cut -f9 | sort | uniq -c | awk '{sum+=$1} END {print sum}' )") >> table-adapt-count-MAGs.txt
+	paste -d "\t" <(echo -e "$line\tAntifreeze proteins\t$(grep -v "^#" $line\_func.annotations | grep -v -i "eukaryota" | grep -i "antifreeze" | cut -f8 | sort | uniq -c | awk '{sum+=$1} END {print sum}' )") >> table-adapt-count-MAGs.txt
+	paste -d "\t" <(echo -e "$line\tFatty acid desaturases\t$(grep -v "^#" $line\_func.annotations | grep -v -i "eukaryota" | grep -E -i "acid desaturase|Phytoene desaturase|acyl-CoA desaturase|Sphingolipid Delta4-desaturase|squalene-associated FAD-dependent desaturase" | cut -f8 | sort | uniq -c | awk '{sum+=$1} END {print sum}' )") >> table-adapt-count-MAGs.txt
+	paste -d "\t" <(echo -e "$line\tHeat shock proteins\t$(grep -v "^#" $line\_func.annotations | grep -E -v -i "eukaryota|chaperone|S1P" | grep -E -i "heat shock" | cut -f8 | sort | uniq -c | awk '{sum+=$1} END {print sum}' )") >> table-adapt-count-MAGs.txt
+	paste -d "\t" <(echo -e "$line\tNucleotide repair proteins\t$(grep -v "^#" $line\_func.annotations | grep -v -i "eukaryota" | grep -E -i "DNA repair|RNA repair|repair protein|repair response|repair endonuclease|repair exonuclease|mismatch repair|photorepair protein|base-excision repair|DNA alkylation repair|damage repair|double-strand break repair|repair of stalled replication forks|repairing DNA|DNA damage lesion repair|base excision repair|double-strand break (DSB) repair|repair of damaged DNA|DNA-repair|UvrABC repair|repair of mismatches in DNA|DNA damage recognition|patch repair" | cut -f8 | sort | uniq -c | awk '{sum+=$1} END {print sum}' )") >> table-adapt-count-MAGs.txt
+done < list_bins.txt
 
-while IFS= read -r line; do a=$( grep -w "$line" table-adapt-count-MAGs.txt | awk -F "\t" '{sum+=$3} END {print sum}' ); echo -e "$line\t$a"; done < list-no-hgts.txt #list-hgts.txt # en bin_func
+while IFS= read -r line; do a=$( grep -w "$line" table-adapt-count-MAGs.txt | awk -F "\t" '{sum+=$3} END {print sum}' ); echo -e "$line\t$a"; done < list-hgts.txt
 
 for function in "Cold shock proteins" "Chaperones" "Osmoprotectant-related proteins" "Antioxidants" "Antifreeze proteins" "Fatty acid desaturases" "Heat shock proteins" "Nucleotide repair proteins"
 do
